@@ -1,1 +1,1 @@
-# Tr-tu-nh-n-t-o-
+Nơi lưu trữ môn trí tuệ nhân tạo 
