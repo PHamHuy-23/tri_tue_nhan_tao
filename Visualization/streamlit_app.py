@@ -84,6 +84,17 @@ st.markdown(
         box-shadow: 5px 6px 0 #c9822b;
         font-size: 46px;
         font-weight: 800;
+        text-decoration: none;
+        cursor: default;
+      }
+
+      a.tile {
+        cursor: pointer;
+      }
+
+      a.tile:hover {
+        transform: translate(2px, 2px);
+        box-shadow: 3px 4px 0 #c9822b;
       }
 
       .empty-tile {
@@ -248,11 +259,16 @@ def make_dirt_cells():
 
 
 def draw_puzzle_board(board):
+    empty = board.index(0)
+    movable_tiles = set(puzzle_neighbors(empty))
     html = ['<div class="puzzle-board">']
-    for value in board:
-        class_name = "tile empty-tile" if value == 0 else "tile"
-        label = "" if value == 0 else str(value)
-        html.append(f'<div class="{class_name}">{escape(label)}</div>')
+    for index, value in enumerate(board):
+        if value == 0:
+            html.append('<div class="tile empty-tile"></div>')
+        elif index in movable_tiles:
+            html.append(f'<a class="tile" href="?tile={index}">{escape(str(value))}</a>')
+        else:
+            html.append(f'<div class="tile">{escape(str(value))}</div>')
     html.append("</div>")
     st.markdown("".join(html), unsafe_allow_html=True)
 
@@ -345,6 +361,23 @@ def move_puzzle_tile(index):
     st.session_state.puzzle_solution = []
 
 
+def handle_puzzle_tile_query():
+    tile = st.query_params.get("tile")
+    if tile is None:
+        return
+
+    try:
+        tile_index = int(tile)
+    except ValueError:
+        st.query_params.clear()
+        return
+
+    if st.session_state.screen == "8-puzzle" and 0 <= tile_index < 9:
+        move_puzzle_tile(tile_index)
+    st.query_params.clear()
+    st.rerun()
+
+
 def apply_puzzle_algorithm():
     steps = run_puzzle_search(st.session_state.algorithm, st.session_state.puzzle_board)
     st.session_state.puzzle_steps = steps
@@ -424,10 +457,6 @@ def puzzle_screen():
     left, right = st.columns([1.1, 1])
     with left:
         draw_puzzle_board(st.session_state.puzzle_board)
-        cols = st.columns(3)
-        for index in range(9):
-            if cols[index % 3].button(f"move {index + 1}", key=f"tile-{index}", use_container_width=True):
-                move_puzzle_tile(index)
         if st.button("Shuffle puzzle"):
             st.session_state.puzzle_board = shuffle_puzzle()
             st.session_state.puzzle_steps = []
@@ -486,6 +515,7 @@ def vacuum_screen():
 
 
 ensure_state()
+handle_puzzle_tile_query()
 header()
 
 sidebar, content = st.columns([0.22, 0.78])
