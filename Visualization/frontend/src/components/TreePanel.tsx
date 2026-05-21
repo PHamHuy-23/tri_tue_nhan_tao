@@ -56,18 +56,16 @@ export function TreePanel({ tree, open, onClose }: Props) {
 
     assign(rootId, 0, 0);
 
-    const nodeW = 140;
-    const nodeH = 48;
-    const gapX = 24;
-    const gapY = 70;
+    const colStep = 140 + 24;
+    const rowStep = 48 + 70;
 
     const nodes: LayoutNode[] = tree.nodes.map((n) => {
       const p = positions[n.id] ?? { x: 0, y: 0 };
       return {
         id: n.id,
         label: n.label,
-        x: 40 + p.x * (nodeW + gapX),
-        y: 40 + p.y * (nodeH + gapY),
+        x: 40 + p.x * colStep,
+        y: 40 + p.y * rowStep,
       };
     });
 
