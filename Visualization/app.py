@@ -1,8 +1,56 @@
 import random
+import time
+import threading
 import tkinter as tk
 from tkinter import font
 
-from search_adapters import grid_to_point, run_puzzle_search, run_vacuum_search
+from search_adapters import grid_to_point, run_puzzle_search
+from search_adapters import run_vacuum_search as _run_vacuum_search_orig
+
+
+def run_vacuum_search(algorithm_name, robot_x, robot_y, dirt, room_x, room_y, room_w, room_h, cell_size, timeout_sec=60):
+    """
+    Wrapper them timeout cho run_vacuum_search goc.
+    Goal la toan bo phong sach (xu ly boi search_adapters).
+    Neu het timeout, tra ve step co timed_out=True.
+    """
+    result_holder = [None]
+    exception_holder = [None]
+
+    def worker():
+        try:
+            result_holder[0] = _run_vacuum_search_orig(
+                algorithm_name, robot_x, robot_y, dirt,
+                room_x, room_y, room_w, room_h, cell_size,
+            )
+        except Exception as exc:
+            exception_holder[0] = exc
+
+    t = threading.Thread(target=worker, daemon=True)
+    t.start()
+    limit = timeout_sec if timeout_sec is not None else None
+    t.join(timeout=limit)
+
+    if exception_holder[0]:
+        raise exception_holder[0]
+
+    if result_holder[0] is not None:
+        return result_holder[0]
+
+    # Timeout xay ra
+    class _TimeoutStep:
+        def __init__(self):
+            self.found = False
+            self.path = None
+            self.current_state = None
+            self.frontier = []
+            self.visited = []
+            self.message = f"Timeout sau {timeout_sec}s"
+            self.timed_out = True
+
+    return [_TimeoutStep()]
+
+
 
 
 WINDOW_WIDTH = 1100
@@ -581,7 +629,11 @@ class VacuumView:
         self.search_steps = []
         self.search_step_index = 0
         self.search_timer = 0
-        self.message = "Chon thuat toan roi bam Apply de robot tim bui gan nhat."
+        self.search_start_time = None
+        self.search_elapsed_ms = 0
+        self.search_timed_out = False
+        self.continue_no_limit = False
+        self.message = "Chon thuat toan roi bam Apply de robot tim tat ca bui."
         self.dirt = self.make_dirt()
 
     def make_dirt(self):
@@ -659,10 +711,10 @@ class VacuumView:
             self.auto_path = []
             self.auto_path_index = 0
             if self.auto_clean_enabled:
-                self.message = "Da don mot khu vuc. Dang tim khu tiep theo..."
+                self.message = "Da don xong mot doan. Tiep tuc don sach ca phong..."
                 self.plan_next_dirty_area()
             else:
-                self.message = "Da di xong duong tim duoc."
+                self.message = "Da di xong duong. Sap don sach ca phong!"
             return
 
         self.target_x, self.target_y = self.auto_path[self.auto_path_index]
@@ -801,8 +853,24 @@ class VacuumView:
 
         self.canvas.create_text(x + 4, y + 4, anchor="w", text=f"Da don: {cleaned}/{total}", fill=COLORS["accent"], font=("Consolas", 12, "bold"))
         self.canvas.create_text(x + 4, y + 32, anchor="w", text="Manual: W A S D / click room", fill=COLORS["muted"], font=("Consolas", 10))
-        reset = PixelButton(self.canvas, x + 214, y + 18, 134, 42, "RESET", self.reset)
+
+        # Hien thi thoi gian neu da chay
+        if self.search_elapsed_ms > 0:
+            elapsed_text = f"Thoi gian: {self.search_elapsed_ms}ms" if self.search_elapsed_ms < 1000 else f"Thoi gian: {self.search_elapsed_ms/1000:.1f}s"
+            self.canvas.create_text(x + 4, y + 52, anchor="w", text=elapsed_text, fill=COLORS["blue"], font=("Consolas", 9))
+
+        reset = PixelButton(self.canvas, x + 214, y + 4, 134, 38, "RESET", self.reset)
         reset.draw()
+
+        # Hien thi nut TIEP TUC khi het thoi gian
+        if self.search_timed_out:
+            continue_btn = PixelButton(
+                self.canvas, x + 214, y + 46, 134, 38,
+                "TIEP TUC",
+                self.apply_algorithm_no_limit,
+                active=True,
+            )
+            continue_btn.draw()
 
     def draw_arrow_button(self, x, y, key, label):
         active = key in self.keys
@@ -836,16 +904,35 @@ class VacuumView:
         self.auto_clean_algorithm = "bfs1"
         self.search_steps = []
         self.search_step_index = 0
-        self.message = "Chon thuat toan roi bam Apply de robot tim bui gan nhat."
+        self.search_timer = 0
+        self.search_start_time = None
+        self.search_elapsed_ms = 0
+        self.search_timed_out = False
+        self.continue_no_limit = False
+        self.message = "Chon thuat toan roi bam Apply de robot don sach ca phong."
         self.dirt = self.make_dirt()
 
     def apply_algorithm(self, algorithm_name):
         self.auto_clean_enabled = True
         self.auto_clean_algorithm = algorithm_name
+        self.search_timed_out = False
+        self.continue_no_limit = False
+        self.plan_next_dirty_area()
+
+    def apply_algorithm_no_limit(self):
+        """Tiep tuc chay khong gioi han thoi gian."""
+        self.continue_no_limit = True
+        self.search_timed_out = False
+        self.auto_clean_enabled = True
         self.plan_next_dirty_area()
 
     def plan_next_dirty_area(self):
         algorithm_name = self.auto_clean_algorithm
+        timeout_sec = None if self.continue_no_limit else 60
+
+        self.message = f"{algorithm_name.upper()} dang tim duong don sach ca phong..."
+        self.search_start_time = time.time()
+
         steps = run_vacuum_search(
             algorithm_name,
             self.robot_x,
@@ -856,13 +943,28 @@ class VacuumView:
             self.room_w,
             self.room_h,
             self.cell_size,
+            timeout_sec=timeout_sec,
         )
+
+        elapsed = time.time() - self.search_start_time
+        self.search_elapsed_ms = int(elapsed * 1000)
+
         final_step = steps[-1] if steps else None
         self.search_steps = steps
         self.search_step_index = 0
         self.search_timer = 0
         self.auto_path = []
         self.pending_auto_path = []
+
+        timed_out = final_step and getattr(final_step, "timed_out", False)
+        if timed_out:
+            self.search_timed_out = True
+            self.auto_clean_enabled = False
+            self.message = (
+                f"Qua {int(elapsed)}s van chua tim ra! "
+                f"Bam 'TIEP TUC' de chay tiep khong gioi han."
+            )
+            return
 
         if final_step is None or not final_step.found or final_step.path is None:
             detail = final_step.message if final_step else "Khong con bui."
@@ -878,16 +980,19 @@ class VacuumView:
             self.clean_grid_cell(final_step.path[-1])
             self.search_steps = []
             if any(not spot["clean"] for spot in self.dirt):
-                self.message = "Dang o ngay tren bui. Tiep tuc tim khu tiep theo..."
+                self.message = "Dang o ngay tren bui. Tiep tuc..."
                 self.plan_next_dirty_area()
             else:
                 self.auto_clean_enabled = False
-                self.message = "Da don sach phong."
+                self.message = f"Da don sach ca phong! ({self.search_elapsed_ms}ms)"
             return
 
         self.target_x = None
         self.target_y = None
-        self.message = f"{algorithm_name.upper()} dang hien thi cach tim bui..."
+        self.message = (
+            f"{algorithm_name.upper()} tim duong xong ({self.search_elapsed_ms}ms). "
+            f"Robot bat dau di {len(self.pending_auto_path)} buoc..."
+        )
 
     def clean_grid_cell(self, cell):
         for spot in self.dirt:
