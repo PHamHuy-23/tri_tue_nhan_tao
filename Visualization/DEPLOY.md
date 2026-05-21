@@ -76,27 +76,29 @@ docker run -p 8000:8000 -e SUPABASE_URL=... -e SUPABASE_SERVICE_ROLE_KEY=... -e 
 
 ## Bước 3: Deploy Frontend (React tĩnh)
 
-### Vercel (khuyên dùng)
+### Netlify (chi tiết)
+
+1. [netlify.com](https://netlify.com) → đăng nhập GitHub → **Add new site** → **Import an existing project**.
+2. Chọn repo → cấu hình:
+
+| Ô | Giá trị |
+|---|---------|
+| **Base directory** | `Visualization/frontend` (repo root = `tri_tue_nhan_tao`) hoặc `frontend` (repo root = `Visualization`) |
+| **Build command** | `npm run build` |
+| **Publish directory** | `dist` |
+
+3. **Environment variables** → `VITE_API_URL` = URL Render (không slash cuối).
+4. **Deploy site** → URL dạng `https://random-name.netlify.app` (đổi tên trong Domain settings).
+5. File `frontend/netlify.toml` đã có redirect SPA.
+
+**CORS:** Render → `CORS_ORIGINS` = `https://your-site.netlify.app,http://localhost:5173` → redeploy.
+
+### Vercel (thay thế)
 
 1. [vercel.com](https://vercel.com) → Import Git repo.
-2. **Root Directory:** `Visualization/frontend` (hoặc `frontend` nếu root repo là `Visualization`).
-3. Framework: **Vite** (tự nhận).
-4. **Environment variable:**
-
-| Biến | Giá trị |
-|------|---------|
-| `VITE_API_URL` | URL backend **không** có slash cuối, ví dụ `https://ai-visualizer-api.onrender.com` |
-
-5. Deploy → URL dạng `https://your-app.vercel.app`.
-
-### Netlify (tương tự)
-
-- Base directory: `frontend`
-- Build: `npm run build`
-- Publish: `dist`
-- Env: `VITE_API_URL` = URL backend
-
-**Quan trọng:** Sau khi có URL frontend, quay lại Render → sửa `CORS_ORIGINS` = URL Vercel (có thể nhiều domain, cách nhau bằng dấu phẩy) → **Redeploy** backend.
+2. **Root Directory:** `Visualization/frontend`
+3. Env: `VITE_API_URL` = URL backend
+4. Sau deploy: cập nhật `CORS_ORIGINS` trên Render = URL Vercel.
 
 ---
 

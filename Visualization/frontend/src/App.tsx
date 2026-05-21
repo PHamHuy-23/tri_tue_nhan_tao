@@ -1,4 +1,5 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { checkHealth, getConfiguredApiBase } from "./api/client";
 import { AlgorithmPanel } from "./components/AlgorithmPanel";
 import { EightPuzzle } from "./components/EightPuzzle";
 import { TracePanel } from "./components/TracePanel";
@@ -20,6 +21,13 @@ export default function App() {
   const [lastTree, setLastTree] = useState<SearchResult["tree"] | null>(null);
   const [treeOpen, setTreeOpen] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
+  const [apiStatus, setApiStatus] = useState<{ ok: boolean; message: string } | null>(
+    null,
+  );
+
+  useEffect(() => {
+    checkHealth().then(setApiStatus);
+  }, []);
 
   const handleApply = () => setApplyToken((t) => t + 1);
   const handleContinue = () => setContinueToken((t) => t + 1);
@@ -44,6 +52,26 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      {apiStatus && !apiStatus.ok && (
+        <div
+          style={{
+            background: colors.red,
+            color: colors.text,
+            padding: "10px 20px",
+            fontSize: 8,
+            lineHeight: 1.6,
+          }}
+        >
+          API: {apiStatus.message}
+          {!getConfiguredApiBase() && (
+            <>
+              <br />
+              Netlify → Environment variables → VITE_API_URL = URL Render → Trigger deploy.
+            </>
+          )}
+        </div>
+      )}
+
       <header className="top-bar">
         <span style={{ fontSize: 12, color: colors.text }}>AI AGENT</span>
         <PixelButton

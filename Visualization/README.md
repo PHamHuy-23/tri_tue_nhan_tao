@@ -80,8 +80,8 @@ Tóm tắt:
 1. Code trên **GitHub** (bắt buộc để auto-deploy).
 2. **Supabase:** chạy migration SQL một lần.
 3. **Render:** backend (`render.yaml` có sẵn).
-4. **Vercel:** frontend, root `frontend/`, env `VITE_API_URL` = URL API.
-5. Sửa `CORS_ORIGINS` trên backend = URL Vercel.
+4. **Netlify** (hoặc Vercel): frontend, base `frontend/`, env `VITE_API_URL` = URL API.
+5. Sửa `CORS_ORIGINS` trên backend = URL Netlify/Vercel.
 6. **Cập nhật tương lai:** `git push` → hosting tự build lại.
 
 ## Bản Tkinter cũ
