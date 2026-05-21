@@ -57,6 +57,7 @@ export function TreePanel({ tree, open, onClose }: Props) {
     assign(rootId, 0, 0);
 
     const nodeW = 140;
+    const nodeH = 48;
     const gapX = 24;
     const gapY = 70;
 
