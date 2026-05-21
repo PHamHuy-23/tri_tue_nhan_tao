@@ -1,0 +1,21 @@
+/** Palette pixel game — teal / coral trên nền navy (khác bản Tk cũ) */
+export const colors = {
+  bg: "#0c1222",
+  grid: "#151d33",
+  panel: "#1a2744",
+  panelDark: "#111a30",
+  line: "#3d5a80",
+  text: "#e8f4ff",
+  muted: "#7b9bb8",
+  accent: "#ff6b4a",
+  accentDark: "#c44d32",
+  accentGlow: "#ffb347",
+  green: "#3dd68c",
+  red: "#ff4d6d",
+  blue: "#4cc9f0",
+  floorA: "#4a6741",
+  floorB: "#3d5636",
+  wall: "#2b3a55",
+  wallLight: "#4a6280",
+  dirt: "#2a1f14",
+} as const;
