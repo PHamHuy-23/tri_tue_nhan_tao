@@ -16,10 +16,17 @@ class Settings(BaseSettings):
     supabase_url: str = ""
     supabase_service_role_key: str = ""
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
+    # Cho phep moi deploy preview/production Netlify (*.netlify.app)
+    cors_origin_regex: str = r"https://.*\.netlify\.app"
 
     @property
     def cors_origin_list(self) -> List[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+    @property
+    def cors_regex(self) -> str | None:
+        value = (self.cors_origin_regex or "").strip()
+        return value or None
 
     @property
     def supabase_enabled(self) -> bool:
