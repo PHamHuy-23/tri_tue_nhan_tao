@@ -53,9 +53,9 @@ export function EightPuzzle({
   const [board, setBoard] = useState(shuffleBoard);
   const [moves, setMoves] = useState(0);
   const [steps, setSteps] = useState<SearchStepDto[]>([]);
-  const [stepIndex, setStepIndex] = useState(0);
+  const [, setStepIndex] = useState(0);
   const [solutionPath, setSolutionPath] = useState<number[][]>([]);
-  const [solutionIndex, setSolutionIndex] = useState(0);
+  const [, setSolutionIndex] = useState(0);
   const [startBeforeSearch, setStartBeforeSearch] = useState<number[]>([]);
 
   const shuffle = useCallback(() => {

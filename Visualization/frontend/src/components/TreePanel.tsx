@@ -17,7 +17,9 @@ interface LayoutNode {
 
 export function TreePanel({ tree, open, onClose }: Props) {
   const layout = useMemo(() => {
-    if (!tree?.nodes.length) return { nodes: [] as LayoutNode[], edges: [] };
+    if (!tree?.nodes.length) {
+      return { nodes: [] as LayoutNode[], edges: [], width: 600, height: 400 };
+    }
 
     const children: Record<string, string[]> = {};
     for (const n of tree.nodes) {
