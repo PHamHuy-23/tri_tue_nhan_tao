@@ -20,16 +20,11 @@ export function TreePanel({ tree, open, onClose }: Props) {
     if (!tree?.nodes.length) return { nodes: [] as LayoutNode[], edges: [] };
 
     const children: Record<string, string[]> = {};
-    const parents: Record<string, string | null> = {};
     for (const n of tree.nodes) {
-      parents[n.id] = null;
       children[n.id] = [];
     }
     for (const e of tree.edges) {
       if (children[e.from]) children[e.from].push(e.to);
-      if (parents[e.to] === null || parents[e.to] === undefined) {
-        parents[e.to] = e.from;
-      }
     }
 
     const roots = tree.nodes
@@ -38,10 +33,8 @@ export function TreePanel({ tree, open, onClose }: Props) {
     const rootId = roots[0] ?? tree.nodes[0].id;
 
     const positions: Record<string, { x: number; y: number }> = {};
-    const levels: Record<string, number> = {};
 
     function assign(id: string, depth: number, offset: number): number {
-      levels[id] = depth;
       const kids = children[id] ?? [];
       if (!kids.length) {
         positions[id] = { x: offset, y: depth };
@@ -62,7 +55,6 @@ export function TreePanel({ tree, open, onClose }: Props) {
     assign(rootId, 0, 0);
 
     const nodeW = 140;
-    const nodeH = 48;
     const gapX = 24;
     const gapY = 70;
 

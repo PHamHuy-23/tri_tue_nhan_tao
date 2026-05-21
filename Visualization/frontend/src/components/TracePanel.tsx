@@ -69,7 +69,7 @@ function Column({
         <MiniPuzzle state={values as number[]} />
       ) : current ? (
         <div style={{ fontSize: 9, wordBreak: "break-all" }}>
-          {compactState(values)}
+          {compactState(values.length === 1 ? values[0] : values)}
         </div>
       ) : (
         <>
