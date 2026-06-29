@@ -58,9 +58,25 @@ Mục tiêu cốt lõi của repository là hiện thực hóa các giải thu�
   * Hiển thị log phân tích nước đi và điểm lượng giá (utility).
 
 ---
+---
 
-## 📂 Liên kết Project
-👉 [Xem chi tiết các project cá nhân tại đây](./Project_ca_nhan/)
+## 🚀 Hướng dẫn chạy ứng dụng trực quan hợp nhất (AI Launcher Hub)
+
+Để mang lại trải nghiệm tiện lợi nhất, toàn bộ 5 bài toán trực quan hóa tương tác lớn đã được gộp chung vào một ứng dụng chạy duy nhất **`main.py`** sử dụng thư viện đồ họa **Pygame**.
+
+### 🛠️ Cài đặt thư viện yêu cầu:
+Trước khi chạy, hãy đảm bảo bạn đã cài đặt các thư viện cần thiết bằng lệnh:
+```bash
+pip install -r requirements.txt
+```
+
+### 🎮 Khởi chạy Launcher:
+Chỉ cần chạy lệnh sau tại thư mục gốc của repository:
+```bash
+python main.py
+```
+
+Khi ứng dụng mở lên, bạn sẽ thấy giao diện **Menu Launcher hiện đại** cho phép chuyển đổi nhanh qua lại giữa cả 5 ứng dụng trực quan (8-Puzzle, N-Queens, Vacuum Grid, Map Coloring, Tic-Tac-Toe) bằng các cú click chuột mà không cần tắt chương trình.
 
 ---
 
