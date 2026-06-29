@@ -1,41 +1,9 @@
 """
 Module containing common helper functions and utilities for the AI algorithms and projects.
-Provides beautiful HTML-based visualization for Jupyter Notebooks.
+Provides Pygame-based GUI visualizer for 8-puzzle solutions.
 """
 import copy
 import time
-from IPython.display import display, HTML, clear_output
-
-def visualize_puzzle_html(state):
-    """
-    Trực quan hóa trạng thái 8-puzzle dưới dạng bảng HTML đẹp mắt.
-    """
-    html = (
-        "<table style='border-collapse: collapse; border: 3px solid #2c3e50; "
-        "font-family: \"Segoe UI\", Helvetica, Arial, sans-serif; font-size: 24px; "
-        "text-align: center; margin: 10px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>"
-    )
-    for row in state:
-        html += "<tr>"
-        for val in row:
-            if val == 0:
-                # Ô trống
-                bg = "#ecf0f1"
-                color = "#ecf0f1"
-                cell_val = ""
-            else:
-                # Ô số
-                bg = "#3498db"
-                color = "white"
-                cell_val = str(val)
-            html += (
-                f"<td style='width: 60px; height: 60px; border: 2px solid #bdc3c7; "
-                f"background-color: {bg}; color: {color}; font-weight: bold; "
-                f"border-radius: 4px; transition: background-color 0.3s;'>{cell_val}</td>"
-            )
-        html += "</tr>"
-    html += "</table>"
-    return html
 
 def get_state_sequence(initial_state, path):
     """
@@ -66,18 +34,124 @@ def get_state_sequence(initial_state, path):
         states.append(copy.deepcopy(current))
     return states
 
-def animate_solution(initial_state, path, delay=0.8):
+def visualize_puzzle_pygame(initial_state, path, delay=0.8):
     """
-    Tạo hiệu ứng animation từng bước di chuyển trực quan trong Jupyter Notebook.
+    Trực quan hóa trạng thái 8-puzzle và từng bước giải bằng Pygame.
+    Hỗ trợ:
+      - Tự động chạy với thời gian chờ (delay).
+      - Nhấn phím SPACE để tạm dừng / tiếp tục.
+      - Nhấn phím MŨI TÊN TRÁI / PHẢI để xem từng bước thủ công.
+      - Nhấn phím R để quay lại trạng thái ban đầu.
     """
+    import pygame
+    
+    # Khởi tạo Pygame
+    pygame.init()
+    
+    # Tải chuỗi trạng thái
     states = get_state_sequence(initial_state, path)
-    for i, state in enumerate(states):
-        clear_output(wait=True)
-        if i == 0:
-            header = "<h3 style='color: #2c3e50;'>🏁 Trạng thái ban đầu:</h3>"
-        else:
-            header = f"<h3 style='color: #e67e22;'>Bước {i}: Di chuyển sang [{path[i-1]}]</h3>"
+    
+    # Kích thước màn hình
+    WINDOW_SIZE = 450
+    GRID_SIZE = 3
+    CELL_SIZE = WINDOW_SIZE // GRID_SIZE
+    FOOTER_HEIGHT = 60
+    
+    # Bảng màu hiện đại (Modern Material Palette)
+    BG_COLOR = (30, 39, 46)        # Dark Charcoal
+    TILE_COLOR = (9, 132, 227)     # Blue
+    EMPTY_COLOR = (47, 53, 66)     # Dark Gray
+    TEXT_COLOR = (255, 255, 255)   # White
+    FOOTER_BG = (47, 53, 66)       # Dark Gray for footer
+    HIGHLIGHT_COLOR = (241, 196, 15) # Gold
+    
+    # Khởi tạo cửa sổ
+    screen = pygame.display.set_mode((WINDOW_SIZE, WINDOW_SIZE + FOOTER_HEIGHT))
+    pygame.display.set_caption("8-Puzzle Solver Visualizer (Pygame)")
+    
+    # Khởi tạo font chữ
+    try:
+        font = pygame.font.SysFont("Segoe UI", 64, bold=True)
+        footer_font = pygame.font.SysFont("Segoe UI", 20, bold=True)
+    except:
+        font = pygame.font.Font(None, 80)
+        footer_font = pygame.font.Font(None, 24)
         
-        # Render HTML
-        display(HTML(header + visualize_puzzle_html(state)))
-        time.sleep(delay)
+    clock = pygame.time.Clock()
+    
+    current_index = 0
+    running = True
+    paused = False
+    last_update_time = time.time()
+    
+    while running:
+        # Xử lý sự kiện
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    paused = not paused
+                elif event.key == pygame.K_r:
+                    current_index = 0
+                elif event.key == pygame.K_RIGHT:
+                    if current_index < len(states) - 1:
+                        current_index += 1
+                        paused = True # Chuyển sang chế độ xem thủ công khi tương tác
+                elif event.key == pygame.K_LEFT:
+                    if current_index > 0:
+                        current_index -= 1
+                        paused = True # Chuyển sang chế độ xem thủ công khi tương tác
+        
+        # Tự động chuyển bước nếu không tạm dừng
+        if not paused and current_index < len(states) - 1:
+            current_time = time.time()
+            if current_time - last_update_time >= delay:
+                current_index += 1
+                last_update_time = current_time
+                
+        # Vẽ giao diện
+        screen.fill(BG_COLOR)
+        
+        # Lấy trạng thái hiện tại
+        state = states[current_index]
+        
+        # Vẽ các ô vuông
+        for r in range(GRID_SIZE):
+            for c in range(GRID_SIZE):
+                val = state[r][c]
+                rect = pygame.Rect(c * CELL_SIZE + 6, r * CELL_SIZE + 6, CELL_SIZE - 12, CELL_SIZE - 12)
+                
+                if val == 0:
+                    # Ô trống vẽ màu sẫm
+                    pygame.draw.rect(screen, EMPTY_COLOR, rect, border_radius=15)
+                else:
+                    # Ô số vẽ màu xanh dương có bo góc
+                    pygame.draw.rect(screen, TILE_COLOR, rect, border_radius=15)
+                    
+                    # Vẽ số lên ô vuông
+                    text_surf = font.render(str(val), True, TEXT_COLOR)
+                    text_rect = text_surf.get_rect(center=rect.center)
+                    screen.blit(text_surf, text_rect)
+                    
+        # Vẽ thanh Footer bên dưới hiển thị thông tin
+        footer_rect = pygame.Rect(0, WINDOW_SIZE, WINDOW_SIZE, FOOTER_HEIGHT)
+        pygame.draw.rect(screen, FOOTER_BG, footer_rect)
+        
+        # Trạng thái văn bản
+        if current_index == 0:
+            status_text = "Trạng thái ban đầu"
+        else:
+            status_text = f"Bước {current_index}/{len(states)-1}: Di chuyển [{path[current_index-1]}]"
+            
+        if paused:
+            status_text += " (TẠM DỪNG)"
+            
+        status_surf = footer_font.render(status_text, True, HIGHLIGHT_COLOR)
+        status_rect = status_surf.get_rect(center=footer_rect.center)
+        screen.blit(status_surf, status_rect)
+        
+        pygame.display.flip()
+        clock.tick(30)
+        
+    pygame.quit()
