@@ -3,7 +3,10 @@ import sys
 import time
 import copy
 import random
-from solvers import bfs_way_1, bfs_way_2, dfs_way_1, dfs_way_2, ids_way_1, ids_way_2, ucs, get_state_sequence
+from solvers import (
+    bfs_way_1, bfs_way_2, dfs_way_1, dfs_way_2, ids_way_1, ids_way_2, ucs,
+    greedy, astar, idastar, h_hamming, h_manhattan, h_euclidean, get_state_sequence
+)
 
 # Initialize Pygame
 pygame.init()
@@ -69,13 +72,30 @@ presets = {
 current_board = copy.deepcopy(presets["Easy"])
 initial_state_user = copy.deepcopy(presets["Easy"])
 
-selected_algo = "BFS (Cách 2)"
+selected_algo = "BFS 2"
 algos = [
-    "BFS (Cách 1)", "BFS (Cách 2)",
-    "DFS (Cách 1)", "DFS (Cách 2)",
-    "IDS (Cách 1)", "IDS (Cách 2)",
-    "UCS"
+    "BFS 1", "BFS 2", "UCS",
+    "DFS 1", "DFS 2", "Greedy H",
+    "IDS 1", "IDS 2", "Greedy M",
+    "A* H", "A* M", "IDA* H",
+    "IDA* M"
 ]
+
+algo_display_names = {
+    "BFS 1": "BFS (Cách 1)",
+    "BFS 2": "BFS (Cách 2)",
+    "DFS 1": "DFS (Cách 1)",
+    "DFS 2": "DFS (Cách 2)",
+    "IDS 1": "IDS (Cách 1)",
+    "IDS 2": "IDS (Cách 2)",
+    "UCS": "UCS (Uniform Cost Search)",
+    "Greedy H": "Greedy (Hamming)",
+    "Greedy M": "Greedy (Manhattan)",
+    "A* H": "A* (Hamming)",
+    "A* M": "A* (Manhattan)",
+    "IDA* H": "IDA* (Hamming)",
+    "IDA* M": "IDA* (Manhattan)"
+}
 
 # Statistics
 stats_status = "Chờ lệnh (Ready)"
@@ -105,8 +125,6 @@ class Button:
     def draw(self, screen, is_active=False):
         color = COLOR_BUTTON_ACTIVE if is_active else (COLOR_BUTTON_HOVER if self.hovered else COLOR_BUTTON)
         pygame.draw.rect(screen, color, self.rect, border_radius=6)
-        
-        # Border
         pygame.draw.rect(screen, COLOR_TEXT, self.rect, width=1, border_radius=6)
         
         text_surf = font_bold.render(self.text, True, COLOR_TEXT)
@@ -143,17 +161,15 @@ def reset_playback():
 
 def generate_random_puzzle():
     global current_board, initial_state_user
-    # Start from goal state and make random moves to guarantee solvability
     state = copy.deepcopy(goal_state)
     
-    # helper for finding zero
     def get_zero(s):
         for i in range(3):
             for j in range(3):
                 if s[i][j] == 0: return i, j
     
     last_zero = get_zero(state)
-    for _ in range(15): # 15 random moves
+    for _ in range(15):
         x, y = last_zero
         possible_moves = []
         for dx, dy in [(-1,0), (1,0), (0,-1), (0,1)]:
@@ -176,7 +192,6 @@ def solve_puzzle():
     stats_status = "Đang giải..."
     reset_playback()
     
-    # Draw quick status during execution
     screen.fill(COLOR_BG)
     status_surf = font_title.render("ĐANG GIẢI QUYẾT BÀI TOÁN...", True, COLOR_GOLD)
     screen.blit(status_surf, (WIDTH//2 - status_surf.get_width()//2, HEIGHT//2))
@@ -189,24 +204,36 @@ def solve_puzzle():
     expanded = 0
     reached = 0
     
-    if selected_algo == "BFS (Cách 1)":
+    if selected_algo == "BFS 1":
         path, steps, expanded, reached = bfs_way_1(initial_state_user, goal_state)
-    elif selected_algo == "BFS (Cách 2)":
+    elif selected_algo == "BFS 2":
         path, steps, expanded, reached = bfs_way_2(initial_state_user, goal_state)
-    elif selected_algo == "DFS (Cách 1)":
+    elif selected_algo == "DFS 1":
         path, steps, expanded, reached = dfs_way_1(initial_state_user, goal_state)
-    elif selected_algo == "DFS (Cách 2)":
+    elif selected_algo == "DFS 2":
         path, steps, expanded, reached = dfs_way_2(initial_state_user, goal_state)
-    elif selected_algo == "IDS (Cách 1)":
+    elif selected_algo == "IDS 1":
         path, depth, steps = ids_way_1(initial_state_user, goal_state)
-        expanded = steps  
-        reached = steps
-    elif selected_algo == "IDS (Cách 2)":
+        expanded, reached = steps, steps
+    elif selected_algo == "IDS 2":
         path, depth, steps = ids_way_2(initial_state_user, goal_state)
-        expanded = steps
-        reached = steps
+        expanded, reached = steps, steps
     elif selected_algo == "UCS":
         path, cost, steps, expanded, reached = ucs(initial_state_user, goal_state)
+    elif selected_algo == "Greedy H":
+        path, steps, expanded, reached = greedy(initial_state_user, goal_state, h_hamming)
+    elif selected_algo == "Greedy M":
+        path, steps, expanded, reached = greedy(initial_state_user, goal_state, h_manhattan)
+    elif selected_algo == "A* H":
+        path, cost, steps, expanded, reached = astar(initial_state_user, goal_state, h_hamming)
+    elif selected_algo == "A* M":
+        path, cost, steps, expanded, reached = astar(initial_state_user, goal_state, h_manhattan)
+    elif selected_algo == "IDA* H":
+        path, limit, steps = idastar(initial_state_user, goal_state, h_hamming)
+        expanded, reached = steps, steps
+    elif selected_algo == "IDA* M":
+        path, limit, steps = idastar(initial_state_user, goal_state, h_manhattan)
+        expanded, reached = steps, steps
         
     end_time = time.perf_counter()
     
@@ -219,7 +246,7 @@ def solve_puzzle():
         stats_expanded = str(expanded)
         stats_reached = str(reached)
         stats_solution_length = f"{len(path)} nước đi"
-        playback_paused = False # Auto play solution
+        playback_paused = False
     else:
         stats_status = "Không có lời giải!"
         stats_time = f"{(end_time - start_time)*1000:.2f} ms"
@@ -250,34 +277,31 @@ def step_forward():
 # Setup UI Buttons
 buttons = []
 
-# 1. Algorithm selector buttons (Right panel)
-# x = 520, w = 180, gap_x = 195 -> Col 1: 520, Col 2: 715
+# 1. Algorithm selector buttons (Right panel) - 3 columns!
+# x = 520, w = 120, gap_x = 125 -> 520, 645, 770
 y_start = 110
 for i, algo in enumerate(algos):
-    col = i % 2
-    row = i // 2
-    btn = Button(520 + col * 195, y_start + row * 38, 180, 30, algo, set_algo, algo)
+    col = i % 3
+    row = i // 3
+    btn = Button(520 + col * 125, y_start + row * 28, 120, 24, algo, set_algo, algo)
     buttons.append(btn)
 
 # 2. Presets buttons (Right panel)
 # x = 520, w = 85, gap_x = 95 -> 520, 615, 710, 805
-y_presets = 315
+y_presets = 310
 preset_keys = ["Easy", "Medium", "Hard"]
 for i, key in enumerate(preset_keys):
     btn = Button(520 + i * 95, y_presets, 85, 30, key, set_preset, key)
     buttons.append(btn)
 
-# Randomize button next to presets
 btn_rand = Button(520 + 3 * 95, y_presets, 85, 30, "Random", generate_random_puzzle)
 buttons.append(btn_rand)
 
 # 3. Main Solve Action button (Right panel)
-btn_solve = Button(520, 360, 375, 40, "GIẢI BÀI TOÁN (SOLVE)", solve_puzzle)
+btn_solve = Button(520, 350, 375, 40, "GIẢI BÀI TOÁN (SOLVE)", solve_puzzle)
 buttons.append(btn_solve)
 
 # 4. Playback controls (Left panel under the board)
-# Width of board is 420 (from x = 40 to 460). 
-# Buttons width = 90 each, gap = 15 -> x = 40, 145, 250, 355
 btn_reset = Button(40, 555, 90, 32, "Tua lại", reset_playback)
 btn_back = Button(145, 555, 90, 32, "Bước lùi", step_backward)
 btn_play = Button(250, 555, 90, 32, "Play/Pause", toggle_playback)
@@ -358,14 +382,14 @@ while running:
     
     # 4. Draw Section Headers (Right Panel)
     screen.blit(font_header.render("1. Chọn thuật toán tìm kiếm", True, COLOR_GOLD), (520, 85))
-    screen.blit(font_header.render("2. Chọn cấu hình ban đầu", True, COLOR_GOLD), (520, 285))
+    screen.blit(font_header.render("2. Chọn cấu hình ban đầu", True, COLOR_GOLD), (520, 280))
     
-    # Draw active algorithm indicator (Clearly separated, no overlapping)
-    active_algo_surf = font_bold.render(f"Đang chọn: {selected_algo}", True, COLOR_GOLD)
+    # Draw active algorithm indicator
+    active_algo_surf = font_bold.render(f"Đang chọn: {algo_display_names.get(selected_algo, selected_algo)}", True, COLOR_GOLD)
     screen.blit(active_algo_surf, (520, 255))
     
     # Draw statistics section (Right Panel)
-    stats_y = 415
+    stats_y = 405
     screen.blit(font_header.render("3. Số liệu thống kê (Statistics)", True, COLOR_GOLD), (520, stats_y))
     
     stats = [
@@ -397,7 +421,6 @@ while running:
         
     # 5. Draw Buttons
     for btn in buttons:
-        # Highlight selected algorithm button
         is_active = (btn.text == selected_algo)
         btn.draw(screen, is_active=is_active)
         
