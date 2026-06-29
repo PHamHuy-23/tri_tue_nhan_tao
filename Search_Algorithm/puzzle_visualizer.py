@@ -9,7 +9,7 @@ from solvers import bfs_way_1, bfs_way_2, dfs_way_1, dfs_way_2, ids_way_1, ids_w
 pygame.init()
 
 # Window Configuration
-WIDTH, HEIGHT = 950, 600
+WIDTH, HEIGHT = 950, 610
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("8-Puzzle Solver Interactive Visualizer")
 clock = pygame.time.Clock()
@@ -29,15 +29,15 @@ COLOR_GOLD = (241, 196, 15)      # Accent Gold
 # Fonts
 try:
     font_title = pygame.font.SysFont("Segoe UI", 26, bold=True)
-    font_header = pygame.font.SysFont("Segoe UI", 20, bold=True)
-    font_text = pygame.font.SysFont("Segoe UI", 16, bold=False)
-    font_bold = pygame.font.SysFont("Segoe UI", 16, bold=True)
+    font_header = pygame.font.SysFont("Segoe UI", 18, bold=True)
+    font_text = pygame.font.SysFont("Segoe UI", 15, bold=False)
+    font_bold = pygame.font.SysFont("Segoe UI", 15, bold=True)
     font_tile = pygame.font.SysFont("Segoe UI", 48, bold=True)
 except:
-    font_title = pygame.font.Font(None, 36)
-    font_header = pygame.font.Font(None, 28)
-    font_text = pygame.font.Font(None, 20)
-    font_bold = pygame.font.Font(None, 20)
+    font_title = pygame.font.Font(None, 34)
+    font_header = pygame.font.Font(None, 24)
+    font_text = pygame.font.Font(None, 18)
+    font_bold = pygame.font.Font(None, 18)
     font_tile = pygame.font.Font(None, 60)
 
 # States presets
@@ -48,17 +48,17 @@ goal_state = [
 ]
 
 presets = {
-    "Easy (2 moves)": [
+    "Easy": [
         [1, 2, 3],
         [4, 0, 6],
         [7, 5, 8]
     ],
-    "Medium (3 moves)": [
+    "Medium": [
         [1, 2, 3],
         [0, 4, 6],
         [7, 5, 8]
     ],
-    "Hard (14 moves)": [
+    "Hard": [
         [1, 3, 5],
         [4, 2, 6],
         [0, 7, 8]
@@ -66,8 +66,8 @@ presets = {
 }
 
 # State Variables
-current_board = copy.deepcopy(presets["Easy (2 moves)"])
-initial_state_user = copy.deepcopy(presets["Easy (2 moves)"])
+current_board = copy.deepcopy(presets["Easy"])
+initial_state_user = copy.deepcopy(presets["Easy"])
 
 selected_algo = "BFS (Cách 2)"
 algos = [
@@ -178,7 +178,6 @@ def solve_puzzle():
     
     # Draw quick status during execution
     screen.fill(COLOR_BG)
-    # Simple draw text
     status_surf = font_title.render("ĐANG GIẢI QUYẾT BÀI TOÁN...", True, COLOR_GOLD)
     screen.blit(status_surf, (WIDTH//2 - status_surf.get_width()//2, HEIGHT//2))
     pygame.display.flip()
@@ -200,7 +199,7 @@ def solve_puzzle():
         path, steps, expanded, reached = dfs_way_2(initial_state_user, goal_state)
     elif selected_algo == "IDS (Cách 1)":
         path, depth, steps = ids_way_1(initial_state_user, goal_state)
-        expanded = steps  # approximation
+        expanded = steps  
         reached = steps
     elif selected_algo == "IDS (Cách 2)":
         path, depth, steps = ids_way_2(initial_state_user, goal_state)
@@ -229,26 +228,6 @@ def solve_puzzle():
         stats_reached = str(reached)
         stats_solution_length = "-"
 
-# Setup UI Buttons
-buttons = []
-# Algorithm selector buttons
-y_start = 80
-for i, algo in enumerate(algos):
-    btn = Button(530 + (i % 2) * 200, y_start + (i // 2) * 40, 190, 32, algo, set_algo, algo)
-    buttons.append(btn)
-
-# Presets buttons
-y_presets = 260
-for i, key in enumerate(presets.keys()):
-    btn = Button(530 + i * 135, y_presets, 125, 32, key.split(" ")[0], set_preset, key)
-    buttons.append(btn)
-
-# Randomize button
-buttons.append(Button(530 + 3 * 135, y_presets, 125, 32, "Ngẫu nhiên", generate_random_puzzle))
-
-# Main action buttons
-buttons.append(Button(530, 315, 400, 40, "GIẢI BÀI TOÁN (SOLVE)", solve_puzzle))
-
 # Playback controls
 def toggle_playback():
     global playback_paused
@@ -268,10 +247,43 @@ def step_forward():
         playback_index += 1
         current_board = copy.deepcopy(solution_states[playback_index])
 
-buttons.append(Button(530, 550, 90, 32, "Tua lại", reset_playback))
-buttons.append(Button(630, 550, 90, 32, "Bước lùi", step_backward))
-buttons.append(Button(730, 550, 90, 32, "Play/Pause", toggle_playback))
-buttons.append(Button(830, 550, 90, 32, "Bước tới", step_forward))
+# Setup UI Buttons
+buttons = []
+
+# 1. Algorithm selector buttons (Right panel)
+# x = 520, w = 180, gap_x = 195 -> Col 1: 520, Col 2: 715
+y_start = 110
+for i, algo in enumerate(algos):
+    col = i % 2
+    row = i // 2
+    btn = Button(520 + col * 195, y_start + row * 38, 180, 30, algo, set_algo, algo)
+    buttons.append(btn)
+
+# 2. Presets buttons (Right panel)
+# x = 520, w = 85, gap_x = 95 -> 520, 615, 710, 805
+y_presets = 315
+preset_keys = ["Easy", "Medium", "Hard"]
+for i, key in enumerate(preset_keys):
+    btn = Button(520 + i * 95, y_presets, 85, 30, key, set_preset, key)
+    buttons.append(btn)
+
+# Randomize button next to presets
+btn_rand = Button(520 + 3 * 95, y_presets, 85, 30, "Random", generate_random_puzzle)
+buttons.append(btn_rand)
+
+# 3. Main Solve Action button (Right panel)
+btn_solve = Button(520, 360, 375, 40, "GIẢI BÀI TOÁN (SOLVE)", solve_puzzle)
+buttons.append(btn_solve)
+
+# 4. Playback controls (Left panel under the board)
+# Width of board is 420 (from x = 40 to 460). 
+# Buttons width = 90 each, gap = 15 -> x = 40, 145, 250, 355
+btn_reset = Button(40, 555, 90, 32, "Tua lại", reset_playback)
+btn_back = Button(145, 555, 90, 32, "Bước lùi", step_backward)
+btn_play = Button(250, 555, 90, 32, "Play/Pause", toggle_playback)
+btn_forward = Button(355, 555, 90, 32, "Bước tới", step_forward)
+
+buttons.extend([btn_reset, btn_back, btn_play, btn_forward])
 
 # Main loop
 running = True
@@ -313,12 +325,12 @@ while running:
     # Render
     screen.fill(COLOR_BG)
     
-    # 1. Draw Title
+    # 1. Draw Title Header
     title_surf = font_title.render("8-PUZZLE SOLVER INTERACTIVE VISUALIZER", True, COLOR_GOLD)
-    screen.blit(title_surf, (20, 20))
+    screen.blit(title_surf, (30, 20))
     
-    # 2. Draw Puzzle Board Panel
-    board_rect = pygame.Rect(40, 80, 420, 420)
+    # 2. Draw Puzzle Board Panel (Left Side)
+    board_rect = pygame.Rect(40, 75, 420, 420)
     pygame.draw.rect(screen, COLOR_PANEL_BG, board_rect, border_radius=15)
     pygame.draw.rect(screen, COLOR_TEXT, board_rect, width=2, border_radius=15)
     
@@ -340,25 +352,24 @@ while running:
                 screen.blit(text_surf, text_rect)
                 
     # 3. Draw Right Panel Background
-    panel_rect = pygame.Rect(500, 70, 430, 520)
+    panel_rect = pygame.Rect(500, 75, 415, 512)
     pygame.draw.rect(screen, COLOR_PANEL_BG, panel_rect, border_radius=10)
     pygame.draw.rect(screen, COLOR_TEXT, panel_rect, width=1, border_radius=10)
     
-    # 4. Draw Section Headers
-    screen.blit(font_header.render("1. Chọn thuật toán tìm kiếm", True, COLOR_GOLD), (520, 80))
-    screen.blit(font_header.render("2. Chọn cấu hình ban đầu", True, COLOR_GOLD), (520, 230))
+    # 4. Draw Section Headers (Right Panel)
+    screen.blit(font_header.render("1. Chọn thuật toán tìm kiếm", True, COLOR_GOLD), (520, 85))
+    screen.blit(font_header.render("2. Chọn cấu hình ban đầu", True, COLOR_GOLD), (520, 285))
     
-    # Draw active algorithm indicator
+    # Draw active algorithm indicator (Clearly separated, no overlapping)
     active_algo_surf = font_bold.render(f"Đang chọn: {selected_algo}", True, COLOR_GOLD)
-    screen.blit(active_algo_surf, (520, 200))
+    screen.blit(active_algo_surf, (520, 255))
     
-    # Draw statistics section
-    stats_y = 370
+    # Draw statistics section (Right Panel)
+    stats_y = 415
     screen.blit(font_header.render("3. Số liệu thống kê (Statistics)", True, COLOR_GOLD), (520, stats_y))
     
     stats = [
         ("Trạng thái:", stats_status),
-        ("Thuật toán đã chạy:", selected_algo if stats_steps != "-" else "-"),
         ("Tổng thời gian giải:", stats_time),
         ("Số lần lặp (steps):", stats_steps),
         ("Số nút đã mở rộng:", stats_expanded),
@@ -369,24 +380,24 @@ while running:
     for idx, (label, val) in enumerate(stats):
         lbl_surf = font_text.render(label, True, COLOR_TEXT)
         val_surf = font_bold.render(val, True, COLOR_GOLD if val not in ["-", "Đang giải..."] else COLOR_TEXT)
-        screen.blit(lbl_surf, (530, stats_y + 30 + idx * 22))
-        screen.blit(val_surf, (730, stats_y + 30 + idx * 22))
+        screen.blit(lbl_surf, (530, stats_y + 25 + idx * 22))
+        screen.blit(val_surf, (730, stats_y + 25 + idx * 22))
         
-    # Playback stats below board
+    # Playback stats (Left Panel)
     playback_desc = f"Trạng thái hiển thị: {playback_index} / {len(solution_states)-1}"
     pb_surf = font_bold.render(playback_desc, True, COLOR_TEXT)
-    screen.blit(pb_surf, (40, 510))
+    screen.blit(pb_surf, (40, 505))
     
     if len(solution_path) > 0:
         path_str = " -> ".join(solution_path[:5])
         if len(solution_path) > 5:
             path_str += f" ... (+{len(solution_path)-5} bước)"
         path_surf = font_text.render(f"Đường đi: {path_str}", True, COLOR_GOLD)
-        screen.blit(path_surf, (40, 535))
+        screen.blit(path_surf, (40, 530))
         
     # 5. Draw Buttons
     for btn in buttons:
-        # Check active algo
+        # Highlight selected algorithm button
         is_active = (btn.text == selected_algo)
         btn.draw(screen, is_active=is_active)
         
