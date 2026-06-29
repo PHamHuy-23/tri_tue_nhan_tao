@@ -110,9 +110,7 @@ def alpha_beta(board, depth, alpha, beta, is_max, stats):
 # ==========================================
 # 3. Expectimax
 # ==========================================
-# MAX (X) cố gắng tối đa hóa điểm số.
-# Đối thủ (O) không chơi tối ưu mà chọn nước đi NGẪU NHIÊN với xác suất đồng đều.
-def expectimax(board, depth, is_max, stats):
+def expectimax_X(board, depth, is_max_turn, stats):
     stats["nodes"] += 1
     terminal, winner = is_terminal(board)
     if terminal:
@@ -121,23 +119,57 @@ def expectimax(board, depth, is_max, stats):
     actions = get_actions(board)
     best_move = None
     
-    if is_max:
+    if is_max_turn:
         best_val = -float('inf')
         for action in actions:
             new_board = list(board)
             new_board[action] = 1
-            val, _ = expectimax(new_board, depth + 1, False, stats)
+            val, _ = expectimax_X(new_board, depth + 1, False, stats)
             if val > best_val:
                 best_val = val
                 best_move = action
         return best_val, best_move
     else:
-        # Node chance (Trung bình có trọng số của các kết quả khả dĩ của đối thủ)
         total_val = 0.0
         prob = 1.0 / len(actions)
         for action in actions:
             new_board = list(board)
             new_board[action] = -1
-            val, _ = expectimax(new_board, depth + 1, True, stats)
+            val, _ = expectimax_X(new_board, depth + 1, True, stats)
             total_val += val * prob
         return total_val, None
+
+def expectimax_O(board, depth, is_min_turn, stats):
+    stats["nodes"] += 1
+    terminal, winner = is_terminal(board)
+    if terminal:
+        return winner * 10 - depth if winner != 0 else 0, None
+        
+    actions = get_actions(board)
+    best_move = None
+    
+    if is_min_turn:
+        best_val = float('inf')
+        for action in actions:
+            new_board = list(board)
+            new_board[action] = -1
+            val, _ = expectimax_O(new_board, depth + 1, False, stats)
+            if val < best_val:
+                best_val = val
+                best_move = action
+        return best_val, best_move
+    else:
+        total_val = 0.0
+        prob = 1.0 / len(actions)
+        for action in actions:
+            new_board = list(board)
+            new_board[action] = 1
+            val, _ = expectimax_O(new_board, depth + 1, True, stats)
+            total_val += val * prob
+        return total_val, None
+
+def expectimax(board, depth, is_max, stats):
+    if is_max:
+        return expectimax_X(board, depth, True, stats)
+    else:
+        return expectimax_O(board, depth, True, stats)
