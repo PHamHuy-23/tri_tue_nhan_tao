@@ -61,6 +61,23 @@ COLOR_RED = (231, 76, 60)        # Laser Red
 COLOR_CYAN = (52, 152, 219)
 COLOR_PURPLE = (155, 89, 182)
 
+# Sub-app specific colors
+COLOR_CLEAN = (47, 53, 66)       # Slate Gray (Clean room)
+COLOR_DIRT = (194, 124, 56)      # Brown/Gold for Dirt
+COLOR_OBSTACLE = (149, 165, 166) # Gray Brick for Obstacles
+COLOR_MAP = {
+    "Red": (231, 76, 60),
+    "Green": (46, 204, 113),
+    "Blue": (52, 152, 219),
+    "Yellow": (241, 196, 15),
+    "Orange": (230, 126, 34),
+    "Purple": (155, 89, 182)
+}
+COLOR_UNASSIGNED = (127, 140, 141)
+COLOR_CELL_BG = (47, 53, 66)     # Clean gray for cell
+COLOR_X = (46, 204, 113)         # Green for X
+COLOR_O = (231, 76, 60)          # Red for O
+
 # Common Fonts
 try:
     font_title = pygame.font.SysFont("Segoe UI", 26, bold=True)
@@ -69,6 +86,8 @@ try:
     font_text = pygame.font.SysFont("Segoe UI", 15, bold=False)
     font_bold = pygame.font.SysFont("Segoe UI", 15, bold=True)
     font_large_symbol = pygame.font.SysFont("Segoe UI", 68, bold=True)
+    font_visual = pygame.font.SysFont("Segoe UI", 16, bold=True)
+    font_node = pygame.font.SysFont("Segoe UI", 14, bold=True)
 except:
     font_title = pygame.font.Font(None, 34)
     font_subtitle = pygame.font.Font(None, 22)
@@ -76,6 +95,8 @@ except:
     font_text = pygame.font.Font(None, 18)
     font_bold = pygame.font.Font(None, 18)
     font_large_symbol = pygame.font.Font(None, 75)
+    font_visual = pygame.font.Font(None, 20)
+    font_node = pygame.font.Font(None, 16)
 
 # Current Screen State
 # "MENU", "PUZZLE", "NQUEENS", "VACUUM", "MAPCOLORING", "TICTACTOE"
