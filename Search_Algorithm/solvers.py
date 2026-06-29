@@ -240,3 +240,27 @@ def ucs(init, goal):
                 heapq.heappush(heap, (new_g, unique_counter, child, path + [move]))
                 
     return None, float('inf'), steps, nodes_expanded, len(reached)
+
+def get_state_sequence(initial_state, path):
+    """
+    Tái tạo danh sách các trạng thái đi từ trạng thái ban đầu dựa vào chuỗi nước đi.
+    """
+    states = [initial_state]
+    current = copy.deepcopy(initial_state)
+    for move in path:
+        # Tìm tọa độ ô số 0
+        x, y = find_zero(current)
+        dx, dy = 0, 0
+        if move == "LÊN":
+            dx, dy = -1, 0
+        elif move == "XUỐNG":
+            dx, dy = 1, 0
+        elif move == "TRÁI":
+            dx, dy = 0, -1
+        elif move == "PHẢI":
+            dx, dy = 0, 1
+            
+        nx, ny = x + dx, y + dy
+        current[x][y], current[nx][ny] = current[nx][ny], current[x][y]
+        states.append(copy.deepcopy(current))
+    return states
