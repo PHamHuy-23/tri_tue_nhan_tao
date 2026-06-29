@@ -255,7 +255,7 @@ class PuzzleScreen:
         for i, algo in enumerate(self.algos):
             col = i % 3
             row = i // 3
-            self.buttons.append(Button(520 + col * 130, 140 + row * 32, 120, 26, algo, self.set_algo, algo))
+            self.buttons.append(Button(520 + col * 130, 135 + row * 28, 120, 24, algo, self.set_algo, algo))
             
         # Presets & Actions
         self.buttons.append(Button(520, 310, 85, 30, "Easy", self.set_preset, "Easy"))
@@ -463,11 +463,11 @@ class PuzzleScreen:
         pygame.draw.rect(screen, COLOR_GRID_LINE, right_panel, width=1, border_radius=10)
         
         screen.blit(font_header.render("1. Chọn thuật toán giải bài toán", True, COLOR_GOLD), (520, 110))
-        screen.blit(font_header.render("2. Chọn cấu hình ban đầu", True, COLOR_GOLD), (520, 280))
-        screen.blit(font_header.render("3. Số liệu hiệu năng giải", True, COLOR_GOLD), (520, 400))
+        screen.blit(font_header.render("2. Chọn cấu hình ban đầu", True, COLOR_GOLD), (520, 285))
+        screen.blit(font_header.render("3. Số liệu hiệu năng giải", True, COLOR_GOLD), (520, 405))
         
         # Display Stats
-        stats_y = 425
+        stats_y = 430
         labels = [
             ("Trạng thái:", self.stats["status"]),
             ("Thời gian giải:", self.stats["time"]),
@@ -513,13 +513,13 @@ class NQueensScreen:
         
         # Algos Grid
         for i, algo in enumerate(self.algos):
-            col = i % 2
-            row = i // 2
-            self.buttons.append(Button(520 + col * 195, 140 + row * 38, 180, 30, algo, self.set_algo, algo))
+            col = i % 3
+            row = i // 3
+            self.buttons.append(Button(520 + col * 130, 135 + row * 28, 120, 24, algo, self.set_algo, algo))
             
         # Controls
-        self.buttons.append(Button(520, 260, 180, 35, "TẠO NGẪU NHIÊN", self.generate_random))
-        self.buttons.append(Button(715, 260, 180, 35, "GIẢI BÀI TOÁN", self.solve))
+        self.buttons.append(Button(520, 230, 180, 32, "TẠO NGẪU NHIÊN", self.generate_random))
+        self.buttons.append(Button(715, 230, 180, 32, "GIẢI BÀI TOÁN", self.solve))
         
         # Playback controls
         self.buttons.append(Button(40, 565, 90, 32, "Tua lại", self.reset_playback))
@@ -691,11 +691,11 @@ class NQueensScreen:
         pygame.draw.rect(screen, COLOR_GRID_LINE, right_panel, width=1, border_radius=10)
         
         screen.blit(font_header.render("1. Chọn thuật toán tìm kiếm cục bộ", True, COLOR_GOLD), (520, 110))
-        screen.blit(font_header.render("2. Điều khiển giải thuật", True, COLOR_GOLD), (520, 230))
-        screen.blit(font_header.render("3. Số liệu thống kê", True, COLOR_GOLD), (520, 315))
+        screen.blit(font_header.render("2. Điều khiển giải thuật", True, COLOR_GOLD), (520, 205))
+        screen.blit(font_header.render("3. Số liệu thống kê", True, COLOR_GOLD), (520, 280))
         
         # Display Stats
-        stats_y = 340
+        stats_y = 305
         labels = [
             ("Trạng thái giải:", self.stats["status"]),
             ("Thời gian giải:", self.stats["time"]),
@@ -747,18 +747,18 @@ class VacuumScreen:
         
         # Algos Grid
         for i, algo in enumerate(self.algos):
-            col = i % 2
-            row = i // 2
-            self.buttons.append(Button(520 + col * 195, 140 + row * 34, 180, 26, algo, self.set_algo, algo))
+            col = i % 3
+            row = i // 3
+            self.buttons.append(Button(520 + col * 130, 135 + row * 28, 120, 24, algo, self.set_algo, algo))
             
         # Tool modes & Actions
-        self.buttons.append(Button(520, 260, 120, 26, "Cọ: Robot", self.set_tool, "robot"))
-        self.buttons.append(Button(650, 260, 120, 26, "Cọ: Rác", self.set_tool, "dirt"))
-        self.buttons.append(Button(780, 260, 120, 26, "Cọ: Tường", self.set_tool, "obstacle"))
+        self.buttons.append(Button(520, 255, 120, 26, "Cọ: Robot", self.set_tool, "robot"))
+        self.buttons.append(Button(650, 255, 120, 26, "Cọ: Rác", self.set_tool, "dirt"))
+        self.buttons.append(Button(780, 255, 120, 26, "Cọ: Tường", self.set_tool, "obstacle"))
         
-        self.buttons.append(Button(520, 300, 120, 32, "Ngẫu nhiên", self.generate_random))
-        self.buttons.append(Button(650, 300, 120, 32, "Xóa sạch", self.clear_grid))
-        self.buttons.append(Button(780, 300, 120, 32, "GIẢI (SOLVE)", self.solve))
+        self.buttons.append(Button(520, 295, 120, 32, "Ngẫu nhiên", self.generate_random))
+        self.buttons.append(Button(650, 295, 120, 32, "Xóa sạch", self.clear_grid))
+        self.buttons.append(Button(780, 295, 120, 32, "GIẢI (SOLVE)", self.solve))
         
         # Playback controls
         self.buttons.append(Button(40, 565, 90, 32, "Tua lại", self.reset_playback))
@@ -1049,8 +1049,8 @@ class VacuumScreen:
         pygame.draw.rect(screen, COLOR_GRID_LINE, right_panel, width=1, border_radius=10)
         
         screen.blit(font_header.render("1. Chọn thuật toán tìm kiếm Robot", True, COLOR_GOLD), (520, 110))
-        screen.blit(font_header.render("2. Chọn cọ vẽ & Tác vụ bản đồ", True, COLOR_GOLD), (520, 235))
-        screen.blit(font_header.render("3. Số liệu thống kê", True, COLOR_GOLD), (520, 350))
+        screen.blit(font_header.render("2. Chọn cọ vẽ & Tác vụ bản đồ", True, COLOR_GOLD), (520, 230))
+        screen.blit(font_header.render("3. Số liệu thống kê", True, COLOR_GOLD), (520, 345))
         
         # Highlights brush borders
         brush_tools = {"robot": btn_t_robot, "dirt": btn_t_dirt, "obstacle": btn_t_obs}
@@ -1059,7 +1059,7 @@ class VacuumScreen:
                 pygame.draw.rect(screen, COLOR_GOLD, btn.rect.inflate(4, 4), width=2, border_radius=8)
 
         # Display Stats
-        stats_y = 375
+        stats_y = 370
         labels = [
             ("Trạng thái giải:", self.stats["status"]),
             ("Thời gian giải:", self.stats["time"]),
@@ -1109,22 +1109,22 @@ class MapColoringScreen:
         
         # Algos Grid
         for i, algo in enumerate(self.algos):
-            col = i % 2
-            row = i // 2
-            self.buttons.append(Button(520 + col * 195, 140 + row * 36, 180, 28, algo, self.set_algo, algo))
+            col = i % 3
+            row = i // 3
+            self.buttons.append(Button(520 + col * 130, 135 + row * 28, 120, 24, algo, self.set_algo, algo))
             
         # Colors & Tool selections
-        self.buttons.append(Button(520, 200, 180, 28, "3 màu (RGB)", self.set_colors, 3))
-        self.buttons.append(Button(715, 200, 180, 28, "4 màu (RGBY)", self.set_colors, 4))
+        self.buttons.append(Button(520, 195, 180, 26, "3 màu (RGB)", self.set_colors, 3))
+        self.buttons.append(Button(715, 195, 180, 26, "4 màu (RGBY)", self.set_colors, 4))
         
-        self.buttons.append(Button(520, 255, 120, 28, "Vẽ Đỉnh (Node)", self.set_tool, "add_node"))
-        self.buttons.append(Button(650, 255, 120, 28, "Vẽ Cạnh (Edge)", self.set_tool, "add_edge"))
-        self.buttons.append(Button(780, 255, 120, 28, "Xóa Đỉnh", self.set_tool, "delete_node"))
+        self.buttons.append(Button(520, 260, 120, 26, "Vẽ Đỉnh (Node)", self.set_tool, "add_node"))
+        self.buttons.append(Button(650, 260, 120, 26, "Vẽ Cạnh (Edge)", self.set_tool, "add_edge"))
+        self.buttons.append(Button(780, 260, 120, 26, "Xóa Đỉnh", self.set_tool, "delete_node"))
         
-        self.buttons.append(Button(520, 300, 85, 30, "Bản đồ Úc", self.load_aus))
-        self.buttons.append(Button(615, 300, 85, 30, "Đồ thị mẫu", self.load_tri))
-        self.buttons.append(Button(710, 300, 85, 30, "Xóa hết", self.clear))
-        self.buttons.append(Button(805, 300, 85, 30, "TÔ MÀU", self.solve))
+        self.buttons.append(Button(520, 295, 85, 30, "Bản đồ Úc", self.load_aus))
+        self.buttons.append(Button(615, 295, 85, 30, "Đồ thị mẫu", self.load_tri))
+        self.buttons.append(Button(710, 295, 85, 30, "Xóa hết", self.clear))
+        self.buttons.append(Button(805, 295, 85, 30, "TÔ MÀU", self.solve))
         
         # Playback controls
         self.buttons.append(Button(40, 565, 90, 32, "Tua lại", self.reset_playback))
@@ -1315,7 +1315,7 @@ class MapColoringScreen:
         for u in self.adj:
             for v in self.adj[u]:
                 edge = tuple(sorted((u, v)))
-                if edge not in drawn and u in self.nodes and v in nodes:
+                if edge not in drawn and u in self.nodes and v in self.nodes:
                     pygame.draw.line(screen, COLOR_GRID_LINE, self.nodes[u], self.nodes[v], width=3)
                     drawn.add(edge)
                     
@@ -1356,7 +1356,7 @@ class MapColoringScreen:
         
         screen.blit(font_header.render("1. Chọn thuật toán CSP giải quyết", True, COLOR_GOLD), (520, 110))
         screen.blit(font_header.render("2. Chọn cọ vẽ & Bản đồ mẫu", True, COLOR_GOLD), (520, 235))
-        screen.blit(font_header.render("3. Số liệu thống kê", True, COLOR_GOLD), (520, 350))
+        screen.blit(font_header.render("3. Số liệu thống kê", True, COLOR_GOLD), (520, 345))
         
         # Highlight active selector buttons
         if self.num_colors == 3: pygame.draw.rect(screen, COLOR_GOLD, btn_col3.rect.inflate(4, 4), width=2, border_radius=8)
@@ -1368,7 +1368,7 @@ class MapColoringScreen:
                 pygame.draw.rect(screen, COLOR_GOLD, btn.rect.inflate(4, 4), width=2, border_radius=8)
 
         # Display Stats
-        stats_y = 375
+        stats_y = 370
         labels = [
             ("Trạng thái giải:", self.stats["status"]),
             ("Thời gian giải:", self.stats["time"]),
@@ -1695,16 +1695,16 @@ ttt_scr = None
 
 # Shared Button layout values for callbacks to reference (Global buttons needed inside callbacks)
 # Brush tools (shared) for Vacuum cleaner & Map coloring reference
-btn_t_robot = Button(520, 260, 120, 26, "Cọ: Robot", None)
-btn_t_dirt = Button(650, 260, 120, 26, "Cọ: Rác", None)
-btn_t_obs = Button(780, 260, 120, 26, "Cọ: Tường", None)
+btn_t_robot = Button(520, 255, 120, 26, "Cọ: Robot", None)
+btn_t_dirt = Button(650, 255, 120, 26, "Cọ: Rác", None)
+btn_t_obs = Button(780, 255, 120, 26, "Cọ: Tường", None)
 
-btn_b_node = Button(520, 255, 120, 28, "Vẽ Đỉnh (Node)", None)
-btn_b_edge = Button(650, 255, 120, 28, "Vẽ Cạnh (Edge)", None)
-btn_b_del = Button(780, 255, 120, 28, "Xóa Đỉnh", None)
+btn_b_node = Button(520, 260, 120, 26, "Vẽ Đỉnh (Node)", None)
+btn_b_edge = Button(650, 260, 120, 26, "Vẽ Cạnh (Edge)", None)
+btn_b_del = Button(780, 260, 120, 26, "Xóa Đỉnh", None)
 
-btn_col3 = Button(520, 200, 180, 28, "3 màu (RGB)", None)
-btn_col4 = Button(715, 200, 180, 28, "4 màu (RGBY)", None)
+btn_col3 = Button(520, 195, 180, 26, "3 màu (RGB)", None)
+btn_col4 = Button(715, 195, 180, 26, "4 màu (RGBY)", None)
 
 btn_m_ha = Button(520, 110, 180, 28, "Human vs AI", None)
 btn_m_aa = Button(715, 110, 180, 28, "AI vs AI Showdown", None)
